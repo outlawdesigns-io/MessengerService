@@ -9,6 +9,13 @@ class EndPoint extends API{
     public function __construct($request,$origin)
     {
         parent::__construct($request);
+        if(isset($this->headers['request_token']) && ! isset($this->headers['password'])){
+          throw new \Exception('Missing required headers.');
+        }elseif(!isset($this->headers['auth_token']) && !isset($this->headers['request_token'])){
+          throw new \Exception('Access Denied. No Token Present.');
+        }elseif(!$this->_verifyToken() && !isset($this->headers['request_token'])){
+          throw new \Exception('Access Denied. Invalid Token');
+        }
     }
     private function _verifyToken(){
       $ch = curl_init();
@@ -39,7 +46,7 @@ class EndPoint extends API{
       return $output;
     }
     protected function example(){
-        return array("endPoint"=>$this->endpoint,"verb"=>$this->verb,"args"=>$this->args,"request"=>$this->request);
+      return array("endPoint"=>$this->endpoint,"verb"=>$this->verb,"args"=>$this->args,"request"=>$this->request);
     }
     protected function authenticate(){
       return $this->_authenticate();
