@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/Api/Api.php';
+require_once __DIR__ . '/Messenger/Messenger.php';
 
 class EndPoint extends API{
 
@@ -57,5 +58,12 @@ class EndPoint extends API{
       }
       return $this->headers['auth_token'];
     }
-    protected function send(){}
+    protected function send(){
+      try{
+        Messenger::send($this->request);
+      }catch(\Exception $e){
+        throw new \Exception($e->getMessage());
+      }
+      return $this->request;
+    }
 }
