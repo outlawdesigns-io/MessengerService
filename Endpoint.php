@@ -60,11 +60,11 @@ class EndPoint extends API{
     }
     protected function send(){
       $message = unserialize(base64_decode($this->request));
-      try{
-        Messenger::send($message);
-      }catch(\Exception $e){
-        throw new \Exception($e->getMessage());
-      }
+      // try{
+      //   Messenger::send($message);
+      // }catch(\Exception $e){
+      //   throw new \Exception($e->getMessage());
+      // }
       return $message;
     }
 }
