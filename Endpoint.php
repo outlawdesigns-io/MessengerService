@@ -65,6 +65,7 @@ class EndPoint extends API{
       // }catch(\Exception $e){
       //   throw new \Exception($e->getMessage());
       // }
+      file_put_contents('/tmp/request',print_r($this->request,true));
       return $this->request;
     }
 }
