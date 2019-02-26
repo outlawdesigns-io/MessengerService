@@ -59,13 +59,12 @@ class EndPoint extends API{
       return $this->headers['auth_token'];
     }
     protected function send(){
-      //$message = unserialize(base64_decode($this->request));
-      // try{
-      //   Messenger::send($message);
-      // }catch(\Exception $e){
-      //   throw new \Exception($e->getMessage());
-      // }
-      file_put_contents('/tmp/request',print_r($this->request,true));
-      return $this->request;
+      $message = unserialize(base64_decode($this->request['message']));
+      try{
+        Messenger::send($message);
+      }catch(\Exception $e){
+        throw new \Exception($e->getMessage());
+      }
+      return $message;
     }
 }
