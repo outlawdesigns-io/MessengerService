@@ -59,6 +59,9 @@ class EndPoint extends API{
       return $this->headers['auth_token'];
     }
     protected function send(){
+      if($this->method != "POST"){
+        throw new \Exception('Can only POST this endpoint');
+      }
       $message = unserialize(base64_decode($this->request['message']));
       try{
         Messenger::send($message);
@@ -66,5 +69,15 @@ class EndPoint extends API{
         throw new \Exception($e->getMessage());
       }
       return $message;
+    }
+    protected function sent(){
+      if(!isset($this->verb)){
+        throw new \Exception('Message name string must be specified');
+      }elseif(!isset($this->args[0]) || empty($this->args[0])){
+        throw new \Exception('Message flag must be specified');
+      }elseif($this->method != "GET"){
+        throw new \Exception('Can only GET this endpoint');
+      }
+      return Messenger::isSent($this->verb,$this->args[0]);
     }
 }
