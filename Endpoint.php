@@ -62,13 +62,12 @@ class EndPoint extends API{
       if($this->method != "POST"){
         throw new \Exception('Can only POST this endpoint');
       }
-      //$message = unserialize(base64_decode($this->request['message']));
       try{
         Messenger::send(json_decode(json_encode($this->request),true));
       }catch(\Exception $e){
         throw new \Exception($e->getMessage());
       }
-      return $message;
+      return $this->request;
     }
     protected function sent(){
       if(!isset($this->verb)){
