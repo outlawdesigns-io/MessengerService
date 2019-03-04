@@ -64,7 +64,7 @@ class EndPoint extends API{
       }
       //$message = unserialize(base64_decode($this->request['message']));
       try{
-        Messenger::send($this->request);
+        Messenger::send(json_decode(json_encode($this->request),true));
       }catch(\Exception $e){
         throw new \Exception($e->getMessage());
       }
