@@ -6,16 +6,24 @@ require_once __DIR__ . '/Messenger/Messenger.php';
 class EndPoint extends API{
 
     const ACCOUNTS = 'http://api.outlawdesigns.io:9661/';
+    const GETERR = 'Can only GET this endpoint';
+    const POSTERR = 'Can only POST this endpoint';
+    const REQERR = 'Malformed Request.';
+    protected static $_authErrors = array(
+      "headers"=>"Missing required headers.",
+      "noToken"=>"Access Denied. No Token Present.",
+      "badToken"=>"Access Denied. Invalid Token"
+    );
 
     public function __construct($request,$origin)
     {
         parent::__construct($request);
         if(isset($this->headers['request_token']) && ! isset($this->headers['password'])){
-          throw new \Exception('Missing required headers.');
+          throw new \Exception(self::$_authErrors['headers']);
         }elseif(!isset($this->headers['auth_token']) && !isset($this->headers['request_token'])){
-          throw new \Exception('Access Denied. No Token Present.');
+          throw new \Exception(self::$_authErrors['noToken']);
         }elseif(!$this->_verifyToken() && !isset($this->headers['request_token'])){
-          throw new \Exception('Access Denied. Invalid Token');
+          throw new \Exception(self::$_authErrors['badToken']);
         }
     }
     private function _verifyToken(){
@@ -60,7 +68,7 @@ class EndPoint extends API{
     }
     protected function send(){
       if($this->method != "POST"){
-        throw new \Exception('Can only POST this endpoint');
+        throw new \Exception(self::POSTERR);
       }
       try{
         Messenger::send(json_decode(json_encode($this->request),true));
@@ -68,6 +76,33 @@ class EndPoint extends API{
         throw new \Exception($e->getMessage());
       }
       return $this->request;
+    }
+    protected function message(){
+      $data = null;
+      if($this->method != "GET"){
+        throw new \Exception(self::GETERR);
+      }
+      if(!isset($this->verb) && !isset($this->args[0])){
+        $data = Messenger::getSent();
+      }elseif(!isset($this->verb) && (int)$this->args[0]){
+        $data = Messenger::getSent($this->args[0]);
+      }else{
+        throw new \Exception(self::REQERR);
+      }
+      return $data;
+    }
+    protected function search(){
+      $data = null;
+      if($this->method != "GET"){
+        throw new \Exception(self::GETERR);
+      }elseif(isset($this->verb) && isset($this->args[0])){
+        $data = Messenger::searchSent($this->verb,$this->args[0]);
+      }elseif(isset($this->verb) && !isset($this->args[0])){
+        throw new \Exception('Must provide search key/value');
+      }else{
+        throw new \Exception(self::REQERR);
+      }
+      return $data;
     }
     protected function sent(){
       if(!isset($this->verb)){
