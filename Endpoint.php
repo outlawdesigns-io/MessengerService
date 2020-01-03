@@ -1,11 +1,11 @@
 <?php
 
-require_once __DIR__ . '/Api/Api.php';
-require_once __DIR__ . '/Messenger/Messenger.php';
+require_once __DIR__ . '/Libs/Api/Api.php';
+require_once __DIR__ . '/Libs/Messenger/Messenger.php';
 
 class EndPoint extends API{
 
-    const ACCOUNTS = 'http://api.outlawdesigns.io:9661/';
+    const ACCOUNTS = 'https://api.outlawdesigns.io:9661/';
     const GETERR = 'Can only GET this endpoint';
     const POSTERR = 'Can only POST this endpoint';
     const REQERR = 'Malformed Request.';
