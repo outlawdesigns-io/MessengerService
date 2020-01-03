@@ -1,8 +1,8 @@
 [submodule "Libs/Messenger"]
-	path = Messenger
+	path = Libs/Messenger
 	url = https://github.com/outlawdesigns-io/Messenger
 [submodule "Libs/Api"]
-	path = Api
+	path = Libs/Api
 	url = https://github.com/outlawdesigns-io/Api
 [submodule "Libs/ContainerSetup"]
 	path = Libs/ContainerSetup
