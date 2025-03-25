@@ -1,0 +1,22 @@
+version: '3.1'
+
+services:
+  backend:
+    image: messengerservice-php8.2
+    environment:
+      ALLOW_OVERRIDE: true
+      MYSQL_HOST: $DOCKER_MYSQL_HOST
+      MYSQL_USER: $DOCKER_MYSQL_USER
+      MYSQL_PASSWORD: $DOCKER_MYSQL_PASS
+      SMTP_HOST: $DOCKER_SMTP_HOST
+      SMTP_PORT: $DOCKER_SMTP_PORT
+      SMTP_USER: $DOCKER_SMTP_USER
+      SMTP_PASS: $DOCKER_SMTP_PASS
+    build:
+      context: $DOCKER_BUILD_DIR/MessengerService/
+      dockerfile: $DOCKER_BUILD_DIR/MessengerService/Dockerfile
+    ports:
+      - '9667:443'
+    volumes:
+      - $DOCKER_CERT_DIR:/etc/apache2/certs
+      - $DOCKER_SHARED_LOG_DIR:/mnt/LOE/log
