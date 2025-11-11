@@ -9,21 +9,16 @@ The Messenger Services provides an interface for developers to programmatically 
 
 ### Security
 
-This API is accessible only by registered users of [outlawdesigns.io](https://outlawdesigns.io) who present a valid authorization token.
-Authorization tokens should be presented as a value of the `auth_token` header. See [AccountService Documentation](https://github.com/outlawdesigns-io/AccountService) for more details.
+This API is accessible only by registered users of [outlawdesigns.io](https://outlawdesigns.io) who present a valid Oauth2 access token.
 
-#### Sample Call
+#### Sample Token Acquisition
 ```
-curl --location --request POST 'https://api.outlawdesigns.io:9667/send' \
---header 'auth_token: YOUR_ACCESS_TOKEN' \
---header 'Content-Type: application/json' \
---data-raw '{
-  "to":["example@example.com"],
-  "subject":"A Test",
-  "msg_name":"test",
-  "body":"Sent using Postman"
-}'
-
+curl --location --request POST 'https://auth.outlawdesigns.io/oauth2/token' \
+--form 'grant_type="client_credentials"' \
+--form 'client_id="$CLIENT_ID"' \
+--form 'client_secret="CLIENT_SECRET"' \
+--form 'audience="https://messenger.outlawdesigns.io"' \
+--form 'scope="openid, profile, email, roles"'
 ```
 
 ### Reporting performance or availability problems
