@@ -20,5 +20,8 @@ RUN if [ -f /var/www/html/htaccess ]; then mv /var/www/html/htaccess /var/www/ht
 # Create default log directory (runtime env may override mount)
 RUN mkdir -p /mnt/LOE/log
 
+# Use production ini
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
 EXPOSE 80
 CMD ["apache2-foreground"]
