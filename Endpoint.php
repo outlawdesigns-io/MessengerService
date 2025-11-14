@@ -26,7 +26,7 @@ class EndPoint extends API{
     public function __construct($request,$origin)
     {
         parent::__construct($request);
-        if(isset($this->headers['Authorization'])){
+        if(!isset($this->headers['Authorization'])){
           throw new \Exception(self::$_authErrors['noToken']);
         }
         $token = explode(' ',$this->headers['Authorization'])[1] ?? null;
