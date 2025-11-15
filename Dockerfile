@@ -17,9 +17,6 @@ RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 # Move htaccess if needed
 RUN if [ -f /var/www/html/htaccess ]; then mv /var/www/html/htaccess /var/www/html/.htaccess; fi
 
-# Create default log directory (runtime env may override mount)
-RUN mkdir -p /mnt/LOE/log
-
 # Use production ini
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 

@@ -15,11 +15,12 @@ services:
       SMTP_PORT: $DOCKER_SMTP_PORT
       SMTP_USER: $DOCKER_SMTP_USER
       SMTP_PASS: $DOCKER_SMTP_PASS
-      APP_LOG_PATH: /mnt/LOE/log/messenger.access.log
     build:
       context: ./
       dockerfile: ./Dockerfile
     ports:
-      - '9667:80'
+      - '2110:80'
     volumes:
-      - /tmp/logs/:/mnt/LOE/log
+      #use these to redirect access logs away from stdout
+      #- ./apache-logs.conf:/etc/apache2/conf-enabled/custom-logs.conf
+      #- /tmp/messenger_logs/:/var/log/apache2
