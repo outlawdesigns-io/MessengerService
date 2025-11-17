@@ -2,69 +2,78 @@
 
 require_once __DIR__ . '/Libs/Api/Api.php';
 require_once __DIR__ . '/Libs/Messenger/Messenger.php';
+require_once __DIR__ . '/Libs/JwksTokenValidator-PHP/JwksTokenValidator.php';
 
 class EndPoint extends API{
 
-    const ACCOUNTS = 'https://api.outlawdesigns.io:9661/';
     const GETERR = 'Can only GET this endpoint';
     const POSTERR = 'Can only POST this endpoint';
     const REQERR = 'Malformed Request.';
     protected static $_authErrors = array(
-      "headers"=>"Missing required headers.",
+      "headers"=>"Malfromed Authorization header.",
       "noToken"=>"Access Denied. No Token Present.",
       "badToken"=>"Access Denied. Invalid Token"
     );
 
+    protected $_tokenValidator;
+    protected $_jwksUri;
+    protected $_cacheFile;
+    protected $_cacheTtl;
+    protected $_oauthAudience;
+    protected $_token;
+    protected $_user;
+
     public function __construct($request,$origin)
     {
         parent::__construct($request);
-        if(isset($this->headers['request_token']) && ! isset($this->headers['password'])){
-          throw new \Exception(self::$_authErrors['headers']);
-        }elseif(!isset($this->headers['auth_token']) && !isset($this->headers['request_token'])){
+        $this->_loadEnvSettings();
+        $this->_tokenValidator = new JwksTokenValidator($this->_jwksUri, $this->_cacheFile, $this->_cacheTtl);
+        if(!isset($this->headers['Authorization'])){
           throw new \Exception(self::$_authErrors['noToken']);
-        }elseif(!$this->_verifyToken() && !isset($this->headers['request_token'])){
+        }
+        $token = explode(' ',$this->headers['Authorization'])[1] ?? null;
+        if(!$token){
+          throw new \Exception(self::$_authErrors['headers']);
+        }
+        $this->_token = $token;
+        if(!$this->_verifyToken()){
           throw new \Exception(self::$_authErrors['badToken']);
         }
     }
+    private function _loadEnvSettings(){
+      if(!$this->_jwksUri = getenv('OAUTH_JWKS_URI')){
+        throw new \Exception('Unable to access environment variable: OAUTH_JWKS_URI');
+      }
+      if(!$this->_cacheFile = getenv('OAUTH_CACHE_PATH')){
+        throw new \Exception('Unable to access environment variable: OAUTH_CACHE_PATH');
+      }
+      if(!$this->_cacheTtl = getenv('OATH_CACHE_TTL')){
+        throw new \Exception('Unable to access environment variable: OATH_CACHE_TTL');
+      }
+      if(!$this->_oauthAudience = getenv('OATH_AUDIENCE')){
+        throw new \Exception('Unable to access environment variable: OATH_AUDIENCE');
+      }
+    }
     private function _verifyToken(){
-      $ch = curl_init();
-      curl_setopt($ch,CURLOPT_URL,self::ACCOUNTS . "verify/");
-      curl_setopt($ch,CURLOPT_HTTPHEADER,array('auth_token: ' . $this->headers['auth_token']));
-      curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
-      $output = json_decode(curl_exec($ch));
-      curl_close($ch);
-      if(isset($output->error)){
+      try{
+        $payload = $this->_tokenValidator->validateJwt($this->_token);
+      }catch(\Exception $ex){
         return false;
       }
-      $this->user = $output;
-      return true;
-    }
-    private function _authenticate(){
-      $headers = array('request_token: ' . $this->headers['request_token'],'password: ' . $this->headers['password']);
-      $ch = curl_init();
-      curl_setopt($ch,CURLOPT_URL,self::ACCOUNTS . "authenticate/");
-      curl_setopt($ch,CURLOPT_HTTPHEADER,$headers);
-      curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
-      $output = json_decode(curl_exec($ch));
-      curl_close($ch);
-      if(isset($output->error)){
-        throw new \Exception($output->error);
+      if(!in_array($this->_oauthAudience,$payload['aud'])){
+        return false;
       }
-      $this->headers['auth_token'] = $output->token;
-      $this->_verifyToken();
-      return $output;
+      $this->_user = $payload;
+      return true;
     }
     protected function example(){
       return array("endPoint"=>$this->endpoint,"verb"=>$this->verb,"args"=>$this->args,"request"=>$this->request);
-    }
-    protected function authenticate(){
-      return $this->_authenticate();
     }
     protected function verify(){
       if(!$this->_verifyToken()){
         throw new \Exception('Token Rejected');
       }
-      return $this->headers['auth_token'];
+      return $this->_token;
     }
     protected function send(){
       if($this->method != "POST"){

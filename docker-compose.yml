@@ -1,10 +1,13 @@
-version: '3.1'
-
 services:
   backend:
     image: messengerservice-php8.2
     environment:
+      TZ: America/Chicago
       ALLOW_OVERRIDE: true
+      OAUTH_JWKS_URI: $DOCKER_OAUTH_JWKS_URI
+      OAUTH_CACHE_PATH: $DOCKER_OAUTH_CACHE_PATH
+      OATH_CACHE_TTL: $DOCKER_OATH_CACHE_TTL
+      OATH_AUDIENCE: $DOCKER_OATH_AUDIENCE
       MYSQL_HOST: $DOCKER_MYSQL_HOST
       MYSQL_USER: $DOCKER_MYSQL_USER
       MYSQL_PASSWORD: $DOCKER_MYSQL_PASS
@@ -13,10 +16,11 @@ services:
       SMTP_USER: $DOCKER_SMTP_USER
       SMTP_PASS: $DOCKER_SMTP_PASS
     build:
-      context: $DOCKER_BUILD_DIR/MessengerService/
-      dockerfile: $DOCKER_BUILD_DIR/MessengerService/Dockerfile
+      context: ./
+      dockerfile: ./Dockerfile
     ports:
-      - '9667:443'
+      - '2110:80'
     volumes:
-      - $DOCKER_CERT_DIR:/etc/apache2/certs
-      - $DOCKER_SHARED_LOG_DIR:/mnt/LOE/log
+      #use these to redirect access logs away from stdout
+      #- ./apache-logs.conf:/etc/apache2/conf-enabled/custom-logs.conf
+      #- /tmp/messenger_logs/:/var/log/apache2
